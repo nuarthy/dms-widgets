@@ -1,0 +1,17 @@
+{
+  "id": "wb-converter",
+  "name": "WB Image Converter",
+  "description": "Drop-to-convert image card (end4-pC port).",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "image",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}

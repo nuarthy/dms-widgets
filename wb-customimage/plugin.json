@@ -1,0 +1,17 @@
+{
+  "id": "wb-customimage",
+  "name": "WB Custom Image",
+  "description": "Custom image card placeholder (end4-pC port, phase 2).",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "wallpaper",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}

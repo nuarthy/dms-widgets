@@ -1,0 +1,17 @@
+{
+  "id": "wb-ram",
+  "name": "WB RAM",
+  "description": "RAM usage card with sun shape (end4-pC port).",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "memory",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}

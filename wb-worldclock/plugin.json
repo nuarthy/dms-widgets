@@ -1,0 +1,17 @@
+{
+  "id": "wb-worldclock",
+  "name": "WB World Clock",
+  "description": "World clock card (end4-pC port).",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "public",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}

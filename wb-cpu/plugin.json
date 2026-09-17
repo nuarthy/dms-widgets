@@ -1,0 +1,17 @@
+{
+  "id": "wb-cpu",
+  "name": "WB CPU",
+  "description": "CPU usage card with 4-point star (end4-pC port).",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "memory",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}

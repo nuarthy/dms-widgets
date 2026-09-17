@@ -1,0 +1,17 @@
+{
+  "id": "wb-usercard",
+  "name": "WB User Card",
+  "description": "User card with lock/logout/power (end4-pC port).",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "person",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}

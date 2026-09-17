@@ -1,0 +1,17 @@
+{
+  "id": "wb-timers",
+  "name": "WB Timers",
+  "description": "Timers card placeholder (end4-pC port, phase 2).",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "timer",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}

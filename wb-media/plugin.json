@@ -1,0 +1,17 @@
+{
+  "id": "wb-media",
+  "name": "WB Media",
+  "description": "Media player card (end4-pC port).",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "music_note",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}
