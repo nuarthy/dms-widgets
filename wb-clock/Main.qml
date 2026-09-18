@@ -268,16 +268,16 @@ DesktopPluginComponent {
 
                 x: {
                     if (bestPosition === "left")
-                        return analogRoot.centerX - analogRoot.faceRadius * 0.5 - width / 2;
+                        return analogRoot.centerX - analogRoot.faceRadius * 0.72 - width / 2;
                     if (bestPosition === "right")
-                        return analogRoot.centerX + analogRoot.faceRadius * 0.5 - width / 2;
+                        return analogRoot.centerX + analogRoot.faceRadius * 0.72 - width / 2;
                     return analogRoot.centerX - width / 2;
                 }
                 y: {
                     if (bestPosition === "top")
-                        return analogRoot.centerY - analogRoot.faceRadius * 0.5 - height / 2;
+                        return analogRoot.centerY - analogRoot.faceRadius * 0.72 - height / 2;
                     if (bestPosition === "bottom")
-                        return analogRoot.centerY + analogRoot.faceRadius * 0.5 - height / 2;
+                        return analogRoot.centerY + analogRoot.faceRadius * 0.72 - height / 2;
                     return analogRoot.centerY - height / 2;
                 }
 
@@ -286,7 +286,7 @@ DesktopPluginComponent {
                         return systemClock.date?.toLocaleDateString(I18n.locale(), SettingsData.clockDateFormat) ?? "";
                     return systemClock.date?.toLocaleDateString(I18n.locale(), "ddd, MMM d") ?? "";
                 }
-                font.pixelSize: Theme.fontSizeSmall
+                font.pixelSize: 10
                 color: root.accentColor
 
                 Behavior on x {
