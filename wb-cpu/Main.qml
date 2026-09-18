@@ -29,12 +29,21 @@ DesktopPluginComponent {
             anchors.fill: parent
             spacing: 2
 
-            Rectangle {
+            Item {
                 Layout.alignment: Qt.AlignRight
                 Layout.preferredWidth: 46
                 Layout.preferredHeight: 46
-                radius: 14
-                color: Theme.primary
+                OrganicBlobHourBulges {
+                    anchors.fill: parent
+                    fillColor: Theme.primary
+                    lobes: 4
+                    rotationDeg: -90
+                    lobeAmount: 0.15
+                    hillPower: 0.85
+                    roundness: 0.05
+                    paddingFrac: 0.02
+                    segments: 144
+                }
                 DankIcon {
                     anchors.centerIn: parent
                     name: "memory"
@@ -51,7 +60,7 @@ DesktopPluginComponent {
             Text {
                 text: root.pct(DgopService.cpuUsage) + "%"
                 color: Theme.primary
-                font.pixelSize: 27
+                font.pixelSize: 38
                 font.weight: Font.Bold
             }
             Text {

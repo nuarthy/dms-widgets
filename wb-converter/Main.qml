@@ -82,7 +82,7 @@ DesktopPluginComponent {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                radius: Theme.cornerRadius + 8
+                radius: Theme.cornerRadius
                 color: "transparent"
                 border.width: 1
                 border.color: root.status === "hover" ? Theme.primary : Theme.withAlpha(Theme.outline, 0.5)

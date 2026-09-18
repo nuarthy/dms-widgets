@@ -8,8 +8,6 @@ Rectangle {
 
     radius: Theme.cornerRadius + 8
     color: Theme.surfaceContainer
-    border.width: 1
-    border.color: Theme.withAlpha(Theme.outline, 0.25)
 
     Item {
         id: slot

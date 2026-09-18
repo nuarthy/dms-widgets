@@ -24,12 +24,21 @@ DesktopPluginComponent {
             anchors.fill: parent
             spacing: 2
 
-            Rectangle {
+            Item {
                 Layout.alignment: Qt.AlignRight
                 Layout.preferredWidth: 46
                 Layout.preferredHeight: 46
-                radius: 14
-                color: Theme.primary
+                OrganicBlobHourBulges {
+                    anchors.fill: parent
+                    fillColor: Theme.primary
+                    lobes: 12
+                    rotationDeg: -90
+                    lobeAmount: 0.075
+                    hillPower: 0.92
+                    roundness: 0.22
+                    paddingFrac: 0.02
+                    segments: 144
+                }
                 DankIcon {
                     anchors.centerIn: parent
                     name: "battery_full"
@@ -46,7 +55,7 @@ DesktopPluginComponent {
             Text {
                 text: BatteryService.batteryAvailable ? root.pct(BatteryService.batteryLevel) + "%" : "--"
                 color: Theme.primary
-                font.pixelSize: 27
+                font.pixelSize: 38
                 font.weight: Font.Bold
             }
             Text {

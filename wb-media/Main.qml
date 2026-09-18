@@ -41,7 +41,7 @@ DesktopPluginComponent {
                 Rectangle {
                     id: artMask
                     anchors.fill: parent
-                    radius: Theme.cornerRadius + 8
+                    radius: Theme.cornerRadius
                     visible: false
                     layer.enabled: true
                 }
@@ -58,7 +58,7 @@ DesktopPluginComponent {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: Theme.cornerRadius + 8
+                    radius: Theme.cornerRadius
                     color: Theme.withAlpha(Theme.surfaceContainerHigh, 0.5)
                     visible: root.artUrl === ""
                     border.width: 1
@@ -102,7 +102,7 @@ DesktopPluginComponent {
 
                 RowLayout {
                     Layout.alignment: Qt.AlignRight
-                    spacing: Theme.spacingS
+                    spacing: 4
 
                     Rectangle {
                         Layout.preferredWidth: 32
@@ -121,15 +121,25 @@ DesktopPluginComponent {
                             onClicked: root.player.previous()
                         }
                     }
-                    Rectangle {
-                        Layout.preferredWidth: 38
-                        Layout.preferredHeight: 38
-                        radius: height / 2
-                        color: Theme.primary
+
+                    Item {
+                        Layout.preferredWidth: 54
+                        Layout.preferredHeight: 54
+                        OrganicBlobHourBulges {
+                            anchors.fill: parent
+                            fillColor: Theme.primary
+                            lobes: 12
+                            rotationDeg: -90
+                            lobeAmount: 0.075
+                            hillPower: 0.92
+                            roundness: 0.22
+                            paddingFrac: 0.02
+                            segments: 144
+                        }
                         DankIcon {
                             anchors.centerIn: parent
                             name: root.playing ? "pause" : "play_arrow"
-                            size: Theme.fontSizeLarge
+                            size: 26
                             color: "white"
                         }
                         MouseArea {
@@ -138,6 +148,7 @@ DesktopPluginComponent {
                             onClicked: root.player.playPause()
                         }
                     }
+
                     Rectangle {
                         Layout.preferredWidth: 32
                         Layout.preferredHeight: 32

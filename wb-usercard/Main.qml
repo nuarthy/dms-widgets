@@ -52,7 +52,7 @@ DesktopPluginComponent {
                 Rectangle {
                     id: avatarMask
                     anchors.fill: parent
-                    radius: Theme.cornerRadius + 8
+                    radius: Theme.cornerRadius
                     visible: false
                     layer.enabled: true
                 }
@@ -69,7 +69,7 @@ DesktopPluginComponent {
 
                 Rectangle {
                     anchors.fill: parent
-                    radius: Theme.cornerRadius + 8
+                    radius: Theme.cornerRadius
                     color: Theme.withAlpha(Theme.surfaceContainerHigh, 0.5)
                     visible: root.avatarPath === ""
                     border.width: 1
