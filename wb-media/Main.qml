@@ -18,6 +18,7 @@ DesktopPluginComponent {
     property string trackArtist: player ? (player.trackArtist || "") : ""
     property bool playing: player ? !!player.isPlaying : false
     property string artUrl: player ? (player.trackArtUrl || "") : ""
+    property bool showVisualizer: root.pluginData.showVisualizer ?? true
 
     CardBase {
         anchors.fill: parent
@@ -107,7 +108,7 @@ DesktopPluginComponent {
                         Layout.fillHeight: true
                         Layout.topMargin: 5
 
-                        readonly property bool live: root.playing && CavaService.cavaAvailable
+                        readonly property bool live: root.showVisualizer && root.playing && CavaService.cavaAvailable
                         property real gain: 1.2
                         property bool holdVisible: false
 

@@ -10,6 +10,7 @@
     "desktop-widget"
   ],
   "component": "./Main.qml",
+  "settings": "./MediaSettings.qml",
   "permissions": [
     "settings_read",
     "settings_write"
