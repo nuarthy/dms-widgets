@@ -8,7 +8,7 @@ import qs.Widgets
 DesktopPluginComponent {
     id: root
 
-    minWidth: 255
+    minWidth: 200
     minHeight: 225
 
     property var formats: ["WEBP", "PNG", "JPG", "AVIF"]

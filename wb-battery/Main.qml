@@ -43,7 +43,7 @@ DesktopPluginComponent {
                     anchors.centerIn: parent
                     name: "battery_full"
                     size: 24
-                    color: "white"
+                    color: Theme.surfaceContainer
                 }
             }
 

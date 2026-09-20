@@ -1,0 +1,14 @@
+{
+  "id": "wb-presets-button",
+  "name": "WB Presets Button",
+  "description": "One-tap button to reopen the WB Presets manager.",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "dashboard_customize",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": []
+}

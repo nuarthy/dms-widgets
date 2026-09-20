@@ -1,0 +1,17 @@
+{
+  "id": "wb-presets",
+  "name": "WB Presets",
+  "description": "Save/apply desktop layout + wallpaper presets with preview.",
+  "version": "0.1.0",
+  "author": "aru",
+  "icon": "dashboard_customize",
+  "type": "desktop",
+  "capabilities": [
+    "desktop-widget"
+  ],
+  "component": "./Main.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write"
+  ]
+}

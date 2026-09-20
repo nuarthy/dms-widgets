@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+# dms-preset: snapshot/restore DMS desktop widget placement + wallpaper.
+# Usage:
+#   dms-preset save <name>    snapshot current widgets + wallpaper as <name>
+#   dms-preset list            show saved presets
+#   dms-preset apply <name>                 restore widgets + wallpaper (restarts DMS)
+#   dms-preset apply <name> --wallpaper-only  switch wallpaper live (no restart)
+#   dms-preset delete <name>   remove a preset
+set -euo pipefail
+
+SESSION="$HOME/.local/state/DankMaterialShell/session.json"
+SETTINGS="$HOME/.config/DankMaterialShell/settings.json"
+PRESET_DIR="$HOME/.config/DankMaterialShell/widget-presets"
+
+cmd="${1:-}"; name="${2:-}"
+
+case "$cmd" in
+  save)
+    [[ -z "$name" ]] && { echo "usage: dms-preset save <name>"; exit 1; }
+    mkdir -p "$PRESET_DIR"
+    python3 - "$SESSION" "$SETTINGS" "$PRESET_DIR/$name.json" <<'EOF'
+import json, sys
+session = json.load(open(sys.argv[1]))
+settings = json.load(open(sys.argv[2]))
+preset = {
+    "desktopWidgetInstances": settings.get("desktopWidgetInstances", []),
+    "desktopWidgetInstancePositions": session.get("desktopWidgetInstancePositions", {}),
+    "wallpaperPath": session.get("wallpaperPath", ""),
+    "wallpaperPathLight": session.get("wallpaperPathLight", ""),
+    "wallpaperPathDark": session.get("wallpaperPathDark", ""),
+    "perModeWallpaper": session.get("perModeWallpaper", False),
+}
+json.dump(preset, open(sys.argv[3], "w"), indent=2)
+n = len(preset["desktopWidgetInstances"])
+print(f"saved: {n} widget instances + wallpaper: {preset['wallpaperPath'] or '(none)'}")
+EOF
+    ;;
+  list)
+    [[ -d "$PRESET_DIR" ]] || { echo "no presets saved yet"; exit 0; }
+    for f in "$PRESET_DIR"/*.json; do
+      [[ -e "$f" ]] || { echo "no presets saved yet"; break; }
+      n=$(basename "$f" .json)
+      widgets=$(python3 -c "import json;print(len(json.load(open('$f')).get('desktopWidgetInstances',[])))")
+      echo "$n ($widgets widgets)"
+    done
+    ;;
+  apply)
+    [[ -z "$name" ]] && { echo "usage: dms-preset apply <name> [--wallpaper-only]"; exit 1; }
+    preset="$PRESET_DIR/$name.json"
+    [[ -f "$preset" ]] || { echo "preset not found: $name"; exit 1; }
+    if [[ "${3:-}" == "--wallpaper-only" ]]; then
+      wall=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('wallpaperPath',''))" "$preset")
+      [[ -z "$wall" ]] && { echo "preset has no wallpaper saved"; exit 1; }
+      dms ipc call wallpaper set "$wall"
+      exit 0
+    fi
+    # NOTE: merge FIRST, restart LAST. This script usually runs as a child
+    # of DMS itself, so stopping first would kill it before it finishes.
+    # auto-backup current state before overwriting
+    cp "$SESSION" "$PRESET_DIR/_backup-session.json"
+    cp "$SETTINGS" "$PRESET_DIR/_backup-settings.json"
+    python3 - "$SESSION" "$SETTINGS" "$preset" <<'EOF'
+import json, sys
+session_path, settings_path, preset_path = sys.argv[1], sys.argv[2], sys.argv[3]
+preset = json.load(open(preset_path))
+session = json.load(open(session_path))
+settings = json.load(open(settings_path))
+settings["desktopWidgetInstances"] = preset.get("desktopWidgetInstances", [])
+session["desktopWidgetInstancePositions"] = preset.get("desktopWidgetInstancePositions", {})
+# NOTE: wallpaper is intentionally NOT restored here. Layout apply
+# leaves the current wallpaper alone; use --wallpaper-only to switch it.
+json.dump(session, open(session_path, "w"), indent=2)
+json.dump(settings, open(settings_path, "w"), indent=2)
+print(f"restored {len(settings['desktopWidgetInstances'])} widgets + wallpaper")
+EOF
+    echo "restarting DMS..."
+    systemctl --user restart dms.service
+    echo "done (previous state backed up as _backup-*)"
+    ;;
+  list-json)
+    [[ -d "$PRESET_DIR" ]] || { echo "[]"; exit 0; }
+    python3 - "$PRESET_DIR" <<'EOF'
+import json, glob, os, sys
+out = []
+for f in sorted(glob.glob(os.path.join(sys.argv[1], "*.json"))):
+    name = os.path.basename(f)[:-5]
+    if name.startswith("_backup"):
+        continue
+    try:
+        p = json.load(open(f))
+    except Exception:
+        continue
+    out.append({
+        "name": name,
+        "widgets": len(p.get("desktopWidgetInstances", [])),
+        "wallpaper": p.get("wallpaperPath", ""),
+        "data": p,
+    })
+print(json.dumps(out))
+EOF
+    ;;
+  rename)
+    [[ -z "$name" || -z "${3:-}" ]] && { echo "usage: dms-preset rename <old> <new>"; exit 1; }
+    [[ -f "$PRESET_DIR/$name.json" ]] || { echo "preset not found: $name"; exit 1; }
+    [[ -e "$PRESET_DIR/$3.json" ]] && { echo "preset already exists: $3"; exit 1; }
+    mv "$PRESET_DIR/$name.json" "$PRESET_DIR/$3.json" && echo "renamed $name -> $3"
+    ;;
+  delete)
+    [[ -z "$name" ]] && { echo "usage: dms-preset delete <name>"; exit 1; }
+    rm -f "$PRESET_DIR/$name.json" && echo "deleted $name"
+    ;;
+  *)
+    echo "usage: dms-preset {save|list|apply|delete} [name]"
+    exit 1
+    ;;
+esac

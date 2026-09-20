@@ -48,7 +48,7 @@ DesktopPluginComponent {
                     anchors.centerIn: parent
                     name: "developer_board"
                     size: 24
-                    color: "white"
+                    color: Theme.surfaceContainer
                 }
             }
 

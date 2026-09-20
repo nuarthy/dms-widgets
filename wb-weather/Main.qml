@@ -7,7 +7,7 @@ import qs.Services
 DesktopPluginComponent {
     id: root
 
-    minWidth: 315
+    minWidth: 220
     minHeight: 165
 
     property var wx: WeatherService.weather
@@ -31,6 +31,7 @@ DesktopPluginComponent {
                 color: Theme.surfaceText
                 font.pixelSize: Theme.fontSizeLarge * 1.1
                 font.weight: Font.DemiBold
+                elide: Text.ElideRight
             }
             Text {
                 Layout.fillWidth: true

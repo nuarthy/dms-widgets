@@ -48,7 +48,7 @@ DesktopPluginComponent {
                     anchors.centerIn: parent
                     name: "memory"
                     size: 24
-                    color: "white"
+                    color: Theme.surfaceContainer
                 }
             }
 

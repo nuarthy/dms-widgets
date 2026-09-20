@@ -10,8 +10,10 @@ import qs.Widgets
 DesktopPluginComponent {
     id: root
 
-    minWidth: 360
-    minHeight: 135
+    minWidth: 230
+    minHeight: root.narrow ? 380 : 135
+
+    readonly property bool narrow: root.width < 320
 
     property var player: MprisController.activePlayer
     property string trackTitle: player ? (player.trackTitle || "Unknown title") : "Nothing playing"
@@ -23,13 +25,17 @@ DesktopPluginComponent {
     CardBase {
         anchors.fill: parent
 
-        RowLayout {
+        GridLayout {
             anchors.fill: parent
-            spacing: Theme.spacingM
+            columns: root.narrow ? 1 : 2
+            rowSpacing: Theme.spacingS
+            columnSpacing: Theme.spacingM
 
             Item {
-                Layout.fillHeight: true
-                Layout.preferredWidth: height
+                Layout.fillWidth: root.narrow
+                Layout.fillHeight: !root.narrow
+                Layout.preferredWidth: root.narrow ? 0 : height
+                Layout.preferredHeight: root.narrow ? 130 : 0
 
                 Image {
                     id: artImg
@@ -267,7 +273,7 @@ exec cava -p /tmp/wb-media-cava.conf < /dev/null`]
                             anchors.centerIn: parent
                             name: root.playing ? "pause" : "play_arrow"
                             size: 26
-                            color: "white"
+                            color: Theme.surfaceContainer
                         }
                         MouseArea {
                             anchors.fill: parent

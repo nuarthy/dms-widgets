@@ -9,8 +9,10 @@ import qs.Widgets
 DesktopPluginComponent {
     id: root
 
-    minWidth: 300
-    minHeight: 220
+    minWidth: 180
+    minHeight: root.narrow ? 330 : 220
+
+    readonly property bool narrow: root.width < 260
 
     property var now: new Date()
     property string localCity: (typeof WeatherService !== "undefined" && WeatherService.weather.city) ? WeatherService.weather.city : "Local"
@@ -142,7 +144,7 @@ DesktopPluginComponent {
 
             GridLayout {
                 Layout.fillWidth: true
-                columns: 2
+                columns: root.narrow ? 1 : 2
                 rowSpacing: Theme.spacingS
                 columnSpacing: Theme.spacingM
 

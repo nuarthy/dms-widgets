@@ -7,8 +7,8 @@ import qs.Widgets
 DesktopPluginComponent {
     id: root
 
-    minWidth: 240
-    minHeight: 232
+    minWidth: 216
+    minHeight: 224
 
     property int monthOffset: 0
     property var today: new Date()
@@ -102,7 +102,7 @@ DesktopPluginComponent {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Text {
-                            width: 28
+                            width: 24
                             horizontalAlignment: Text.AlignHCenter
                             anchors.centerIn: parent
                             text: modelData
@@ -120,26 +120,26 @@ DesktopPluginComponent {
                         Layout.fillHeight: true
 
                         Item {
-                            width: 28
-                            height: 28
+                            width: 24
+                            height: 24
                             anchors.centerIn: parent
 
                             Rectangle {
-                                width: 26
-                                height: 26
-                                radius: 13
+                                width: 22
+                                height: 22
+                                radius: 11
                                 anchors.centerIn: parent
                                 visible: root.isToday(root.cellDate(index))
                                 color: Theme.primary
                             }
                             Text {
-                                width: 28
+                                width: 24
                                 horizontalAlignment: Text.AlignHCenter
                                 anchors.centerIn: parent
                                 text: root.cellDate(index).getDate()
-                                color: root.isToday(root.cellDate(index)) ? "white" : Theme.surfaceText
+                                color: root.isToday(root.cellDate(index)) ? Theme.surfaceContainer : Theme.surfaceText
                                 opacity: root.inMonth(root.cellDate(index)) ? 1 : 0.35
-                                font.pixelSize: 11
+                                font.pixelSize: 10
                             }
                         }
                     }

@@ -10,8 +10,10 @@ import qs.Widgets
 DesktopPluginComponent {
     id: root
 
-    minWidth: 322
-    minHeight: 172
+    minWidth: 220
+    minHeight: root.narrow ? 400 : 172
+
+    readonly property bool narrow: root.width < 300
 
     property string displayName: UserInfoService.fullName !== "" ? UserInfoService.fullName : (UserInfoService.username !== "" ? UserInfoService.username : "user")
     property string uptimeText: (typeof DgopService !== "undefined" && DgopService.uptime) ? DgopService.uptime : ""
@@ -32,13 +34,17 @@ DesktopPluginComponent {
     CardBase {
         anchors.fill: parent
 
-        RowLayout {
+        GridLayout {
             anchors.fill: parent
-            spacing: Theme.spacingM
+            columns: root.narrow ? 1 : 2
+            rowSpacing: Theme.spacingS
+            columnSpacing: Theme.spacingM
 
             Item {
-                Layout.fillHeight: true
-                Layout.preferredWidth: height
+                Layout.fillWidth: root.narrow
+                Layout.fillHeight: !root.narrow
+                Layout.preferredWidth: root.narrow ? 0 : height
+                Layout.preferredHeight: root.narrow ? 150 : 0
 
                 Image {
                     id: avatarImg
@@ -210,12 +216,12 @@ DesktopPluginComponent {
                             DankIcon {
                                 name: "lock"
                                 size: Theme.fontSizeMedium
-                                color: "white"
+                                color: Theme.surfaceContainer
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                             Text {
                                 text: "Lock"
-                                color: "white"
+                                color: Theme.surfaceContainer
                                 anchors.verticalCenter: parent.verticalCenter
                             }
                         }
