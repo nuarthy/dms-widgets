@@ -28,7 +28,7 @@ DesktopPluginComponent {
     function screensOf(p) {
         if (!p || !p.data || !p.data.desktopWidgetInstancePositions)
             return [];
-        return Object.keys(p.data.desktopWidgetInstancePositions);
+        return Object.keys(p.data.desktopWidgetInstancePositions).filter(k => !k.startsWith("_"));
     }
 
     function refresh() {
@@ -86,7 +86,8 @@ DesktopPluginComponent {
                 }
                 DankButton {
                     iconName: "close"
-                    buttonHeight: 30
+                    buttonHeight: 28
+                    horizontalPadding: 6
                     onClicked: hideProc.running = true
                 }
             }
@@ -175,7 +176,8 @@ DesktopPluginComponent {
                             }
                             DankButton {
                                 iconName: root.renamingName === modelData.name ? "check" : "edit"
-                                buttonHeight: 30
+                                buttonHeight: 28
+                    horizontalPadding: 6
                                 onClicked: {
                                     if (root.renamingName === modelData.name) {
                                         if (renameField.text.trim() !== "" && renameField.text.trim() !== modelData.name)
@@ -187,18 +189,27 @@ DesktopPluginComponent {
                                 }
                             }
                             DankButton {
+                                iconName: "save"
+                                buttonHeight: 28
+                    horizontalPadding: 6
+                                onClicked: root.runCmd(["update", modelData.name])
+                            }
+                            DankButton {
                                 iconName: "wallpaper"
-                                buttonHeight: 30
+                                buttonHeight: 28
+                    horizontalPadding: 6
                                 onClicked: root.runCmd(["apply", modelData.name, "--wallpaper-only"])
                             }
                             DankButton {
                                 iconName: "check"
-                                buttonHeight: 30
+                                buttonHeight: 28
+                    horizontalPadding: 6
                                 onClicked: root.runCmd(["apply", modelData.name])
                             }
                             DankButton {
                                 iconName: "delete"
-                                buttonHeight: 30
+                                buttonHeight: 28
+                    horizontalPadding: 6
                                 onClicked: root.runCmd(["delete", modelData.name])
                             }
                         }
@@ -223,7 +234,8 @@ DesktopPluginComponent {
 
                 DankButton {
                     iconName: "chevron_left"
-                    buttonHeight: 30
+                    buttonHeight: 28
+                    horizontalPadding: 6
                     onClicked: {
                         const ss = root.screensOf(root.sel());
                         if (ss.length > 0) {
@@ -246,12 +258,38 @@ DesktopPluginComponent {
                 }
                 DankButton {
                     iconName: "chevron_right"
-                    buttonHeight: 30
+                    buttonHeight: 28
+                    horizontalPadding: 6
                     onClicked: {
                         const ss = root.screensOf(root.sel());
                         if (ss.length > 0) {
                             root.screenIdx = (root.screenIdx + 1) % ss.length;
                             preview.requestPaint();
+                        }
+                    }
+                }
+                DankButton {
+                    iconName: "compare_arrows"
+                    buttonHeight: 28
+                    horizontalPadding: 6
+                    onClicked: {
+                        const ss = root.screensOf(root.sel());
+                        if (ss.length > 1) {
+                            const from = ss[root.screenIdx % ss.length];
+                            const to = ss[(root.screenIdx + 1) % ss.length];
+                            root.runCmd(["apply-screen", root.selectedName, from, to]);
+                        }
+                    }
+                }
+                DankButton {
+                    iconName: "monitor"
+                    buttonHeight: 28
+                    horizontalPadding: 6
+                    onClicked: {
+                        const ss = root.screensOf(root.sel());
+                        if (ss.length > 0) {
+                            const scr = ss[root.screenIdx % ss.length];
+                            root.runCmd(["apply", root.selectedName, "--screen", scr]);
                         }
                     }
                 }

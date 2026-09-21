@@ -5,6 +5,8 @@
 #   dms-preset list            show saved presets
 #   dms-preset apply <name>                 restore widgets + wallpaper (restarts DMS)
 #   dms-preset apply <name> --wallpaper-only  switch wallpaper live (no restart)
+#   dms-preset apply-screen <name> <from> <to>  copy one screen's layout to another (restarts DMS)
+#   dms-preset apply <name> --screen <scr>     restore one screen only, leave others live (restarts DMS)
 #   dms-preset delete <name>   remove a preset
 set -euo pipefail
 
@@ -22,9 +24,27 @@ case "$cmd" in
 import json, sys
 session = json.load(open(sys.argv[1]))
 settings = json.load(open(sys.argv[2]))
+def screen_sizes():
+    try:
+        import subprocess
+        out = subprocess.run(["niri", "msg", "-j", "outputs"], capture_output=True, text=True, timeout=5).stdout
+        data = json.loads(out)
+        # niri -j outputs may be a dict keyed by name or a list
+        items = data.values() if isinstance(data, dict) else data
+        sizes = {}
+        for o in items:
+            name = o.get("name")
+            lg = o.get("logical", {}) or {}
+            if name and lg.get("width"):
+                sizes[name] = [lg["width"], lg["height"]]
+        return sizes
+    except Exception:
+        return {}
+
 preset = {
     "desktopWidgetInstances": settings.get("desktopWidgetInstances", []),
     "desktopWidgetInstancePositions": session.get("desktopWidgetInstancePositions", {}),
+    "screenSizes": screen_sizes(),
     "wallpaperPath": session.get("wallpaperPath", ""),
     "wallpaperPathLight": session.get("wallpaperPathLight", ""),
     "wallpaperPathDark": session.get("wallpaperPathDark", ""),
@@ -54,6 +74,12 @@ EOF
       dms ipc call wallpaper set "$wall"
       exit 0
     fi
+    export DMS_PRESET_SCREEN=""
+    if [[ "${3:-}" == "--screen" ]]; then
+      [[ -z "${4:-}" ]] && { echo "usage: dms-preset apply <name> --screen <screen>"; exit 1; }
+      DMS_PRESET_SCREEN="$4"
+      export DMS_PRESET_SCREEN
+    fi
     # NOTE: merge FIRST, restart LAST. This script usually runs as a child
     # of DMS itself, so stopping first would kill it before it finishes.
     # auto-backup current state before overwriting
@@ -66,12 +92,26 @@ preset = json.load(open(preset_path))
 session = json.load(open(session_path))
 settings = json.load(open(settings_path))
 settings["desktopWidgetInstances"] = preset.get("desktopWidgetInstances", [])
-session["desktopWidgetInstancePositions"] = preset.get("desktopWidgetInstancePositions", {})
+ppos = preset.get("desktopWidgetInstancePositions", {})
+import os as _os
+only_screen = _os.environ.get("DMS_PRESET_SCREEN", "")
+if only_screen:
+    # per-screen apply: restore this screen's sections only, leave others live
+    session_pos = session.get("desktopWidgetInstancePositions", {})
+    for iid, screens in ppos.items():
+        if only_screen in screens:
+            session_pos.setdefault(iid, {})[only_screen] = screens[only_screen]
+    print(f"screen {only_screen} restored from preset (others untouched)")
+else:
+    session_pos = {}
+    for iid, screens in ppos.items():
+        session_pos[iid] = dict(screens)
+session["desktopWidgetInstancePositions"] = session_pos
 # NOTE: wallpaper is intentionally NOT restored here. Layout apply
 # leaves the current wallpaper alone; use --wallpaper-only to switch it.
 json.dump(session, open(session_path, "w"), indent=2)
 json.dump(settings, open(settings_path, "w"), indent=2)
-print(f"restored {len(settings['desktopWidgetInstances'])} widgets + wallpaper")
+print(f"restored {len(settings['desktopWidgetInstances'])} widgets (wallpaper untouched)")
 EOF
     echo "restarting DMS..."
     systemctl --user restart dms.service
@@ -99,11 +139,112 @@ for f in sorted(glob.glob(os.path.join(sys.argv[1], "*.json"))):
 print(json.dumps(out))
 EOF
     ;;
+  update)
+    # usage: dms-preset update <name> — refresh a preset from live state (keeps its wallpaper)
+    [[ -z "$name" ]] && { echo "usage: dms-preset update <name>"; exit 1; }
+    preset="$PRESET_DIR/$name.json"
+    [[ -f "$preset" ]] || { echo "preset not found: $name"; exit 1; }
+    python3 - "$SESSION" "$SETTINGS" "$preset" <<'EOF'
+import json, subprocess, sys
+session = json.load(open(sys.argv[1]))
+settings = json.load(open(sys.argv[2]))
+preset = json.load(open(sys.argv[3]))
+preset["desktopWidgetInstances"] = settings.get("desktopWidgetInstances", [])
+preset["desktopWidgetInstancePositions"] = session.get("desktopWidgetInstancePositions", {})
+try:
+    out = subprocess.run(["niri", "msg", "-j", "outputs"], capture_output=True, text=True, timeout=5).stdout
+    data = json.loads(out)
+    items = data.values() if isinstance(data, dict) else data
+    preset["screenSizes"] = {o["name"]: [o["logical"]["width"], o["logical"]["height"]] for o in items if o.get("name") and (o.get("logical") or {}).get("width")}
+except Exception:
+    pass
+json.dump(preset, open(sys.argv[3], "w"), indent=2)
+print(f"updated {sys.argv[3].split('/')[-1]} from live state (wallpaper kept)")
+EOF
+    ;;
+  sync-screen)
+    # usage: dms-preset sync-screen <screen> — copy live <screen> layout into ALL presets
+    [[ -z "$name" ]] && { echo "usage: dms-preset sync-screen <screen>"; exit 1; }
+    python3 - "$SESSION" "$PRESET_DIR" "$name" <<'EOF'
+import json, glob, os, sys
+session = json.load(open(sys.argv[1]))
+live = session.get("desktopWidgetInstancePositions", {})
+n = 0
+for f in glob.glob(os.path.join(sys.argv[2], "*.json")):
+    if os.path.basename(f).startswith("_backup"):
+        continue
+    p = json.load(open(f))
+    changed = False
+    for iid, screens in p.get("desktopWidgetInstancePositions", {}).items():
+        if sys.argv[3] in live.get(iid, {}):
+            if screens.get(sys.argv[3]) != live[iid][sys.argv[3]]:
+                screens[sys.argv[3]] = live[iid][sys.argv[3]]
+                changed = True
+    if changed:
+        json.dump(p, open(f, "w"), indent=2)
+        n += 1
+print(f"synced {sys.argv[3]} section in {n} preset(s)")
+EOF
+    ;;
   rename)
     [[ -z "$name" || -z "${3:-}" ]] && { echo "usage: dms-preset rename <old> <new>"; exit 1; }
     [[ -f "$PRESET_DIR/$name.json" ]] || { echo "preset not found: $name"; exit 1; }
     [[ -e "$PRESET_DIR/$3.json" ]] && { echo "preset already exists: $3"; exit 1; }
     mv "$PRESET_DIR/$name.json" "$PRESET_DIR/$3.json" && echo "renamed $name -> $3"
+    ;;
+  apply-screen)
+    # usage: dms-preset apply-screen <name> <from-screen> <to-screen>
+    # copies one screen's layout onto another (scaled), then restarts DMS
+    from="${3:-}"; to="${4:-}"
+    [[ -z "$name" || -z "$to" || -z "$from" ]] && { echo "usage: dms-preset apply-screen <name> <from-screen> <to-screen>"; exit 1; }
+    preset="$PRESET_DIR/$name.json"
+    [[ -f "$preset" ]] || { echo "preset not found: $name"; exit 1; }
+    cp "$SESSION" "$PRESET_DIR/_backup-session.json"
+    cp "$SETTINGS" "$PRESET_DIR/_backup-settings.json"
+    python3 - "$SESSION" "$preset" "$from" "$to" <<'EOF'
+import json, subprocess, sys
+session_path, preset_path, from_scr, to_scr = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+preset = json.load(open(preset_path))
+session = json.load(open(session_path))
+
+def live_sizes():
+    try:
+        out = subprocess.run(["niri", "msg", "-j", "outputs"], capture_output=True, text=True, timeout=5).stdout
+        data = json.loads(out)
+        items = data.values() if isinstance(data, dict) else data
+        return {o["name"]: [o["logical"]["width"], o["logical"]["height"]] for o in items if o.get("name") and (o.get("logical") or {}).get("width")}
+    except Exception:
+        return {}
+
+saved_sizes = preset.get("screenSizes", {}) or {}
+live = live_sizes()
+fs = saved_sizes.get(from_scr) or live.get(from_scr)
+ts = live.get(to_scr) or saved_sizes.get(to_scr)
+if fs and ts and fs[0] and fs[1]:
+    sx, sy = ts[0] / fs[0], ts[1] / fs[1]
+else:
+    sx, sy = 1.0, 1.0
+
+moved = 0
+ppos = preset.get("desktopWidgetInstancePositions", {})
+spos = session.setdefault("desktopWidgetInstancePositions", {})
+for iid, screens in ppos.items():
+    r = screens.get(from_scr)
+    if not r or r.get("x") is None:
+        continue
+    spos.setdefault(iid, {})[to_scr] = {
+        "x": round(r["x"] * sx, 2),
+        "y": round(r["y"] * sy, 2),
+        "width": round(r.get("width", 200) * sx, 2),
+        "height": round(r.get("height", 200) * sy, 2),
+    }
+    moved += 1
+json.dump(session, open(session_path, "w"), indent=2)
+print(f"copied {from_scr} -> {to_scr} for {moved} widgets (scale {sx:.2f}x{sy:.2f})")
+EOF
+    echo "restarting DMS..."
+    systemctl --user restart dms.service
+    echo "done (previous state backed up as _backup-*)"
     ;;
   delete)
     [[ -z "$name" ]] && { echo "usage: dms-preset delete <name>"; exit 1; }
