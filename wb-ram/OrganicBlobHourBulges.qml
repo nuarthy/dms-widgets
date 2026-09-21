@@ -12,7 +12,7 @@ Item {
     property real hillPower: 0.78
     property real paddingFrac: 0.020
     property real inset: 0
-    property int segments: 120
+    property int segments: 48
     property real rotationDeg: -90
 
     layer.enabled: true

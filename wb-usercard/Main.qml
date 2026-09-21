@@ -50,8 +50,11 @@ DesktopPluginComponent {
                     id: avatarImg
                     anchors.fill: parent
                     source: root.avatarPath
+                    sourceSize.width: 256
+                    sourceSize.height: 256
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
+                    cache: false
                     visible: false
                 }
 

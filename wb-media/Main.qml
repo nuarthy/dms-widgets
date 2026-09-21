@@ -41,8 +41,11 @@ DesktopPluginComponent {
                     id: artImg
                     anchors.fill: parent
                     source: root.artUrl
+                    sourceSize.width: 256
+                    sourceSize.height: 256
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
+                    cache: false
                     visible: false
                 }
 
@@ -267,7 +270,7 @@ exec cava -p /tmp/wb-media-cava.conf < /dev/null`]
                             hillPower: 0.92
                             roundness: 0.22
                             paddingFrac: 0.02
-                            segments: 144
+                            segments: 48
                         }
                         DankIcon {
                             anchors.centerIn: parent

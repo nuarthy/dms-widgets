@@ -42,7 +42,7 @@ DesktopPluginComponent {
                     hillPower: 0.85
                     roundness: 0.05
                     paddingFrac: 0.02
-                    segments: 144
+                    segments: 48
                 }
                 DankIcon {
                     anchors.centerIn: parent
