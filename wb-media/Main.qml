@@ -16,8 +16,8 @@ DesktopPluginComponent {
     readonly property bool narrow: root.width < 320
 
     property var player: MprisController.activePlayer
-    property string trackTitle: player ? (player.trackTitle || "Unknown title") : "Nothing playing"
-    property string trackArtist: player ? (player.trackArtist || "") : ""
+    property string trackTitle: player ? (player.trackTitle || "Unknown title") : "Awaits for another vibe"
+    property string trackArtist: player ? (player.trackArtist || "") : "Where words fail, music speaks"
     property bool playing: player ? !!player.isPlaying : false
     property string artUrl: player ? (player.trackArtUrl || "") : ""
     property bool showVisualizer: root.pluginData.showVisualizer ?? true
